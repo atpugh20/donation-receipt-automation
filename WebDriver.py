@@ -18,67 +18,52 @@ class WebDriver:
         self.crm_url = os.getenv("CRM_URL")
         self.fundraising_url = os.getenv("FUNDRAISING_URL")
 
-        self.targetEmail = "Donation Receipt Copy (Copy)"
+        self.targetTemplate = "Donation Receipt (template)"
+        self.emailName = "automated_email"
         self.createdBy = "BloomerangFundraisingIntegration-Dillon Phillips"
 
-        self.driver1 = webdriver.Firefox()
+        self.driver = webdriver.Firefox()
 
         print("Web Driver Built.")
 
     def OpenCRM(self) -> None:
-        self.driver1.get(self.crm_url)
-        time.sleep(1)
-        self.driver1.find_element(By.ID, "usernameField").send_keys(self.username)
-        self.driver1.find_element(By.ID, "passwordField").send_keys(self.password)
-        time.sleep(1)
-        self.driver1.find_element(By.ID, "login-submit").click()
-        time.sleep(2)
-        self.driver1.find_element(By.ID, "communications-sub-navigation-label").click()
-        time.sleep(1)
-        self.driver1.find_element(By.ID, "emails-navigation-link-label").click()
-        time.sleep(1)
-        self.ClickFromClass("email-name-data", self.targetEmail)
-
-        time.sleep(1)
-
-        self.driver1.find_element(By.ID, "recipients-tab").click()
-        time.sleep(1)
-        self.driver1.find_element(By.CLASS_NAME, "filter-tag-drag-source").click()
-        time.sleep(1)
-
-        self.ClickFromClass("name-button", "Acknowledgement Status")
-
-        time.sleep(2)
-
-        self.driver1.find_element(By.CLASS_NAME, "rw-widget-input").click()
-        self.ClickFromClass("multiselect-item", "No")
-        self.driver1.find_element(By.CLASS_NAME, "btn-primary").click()
-        time.sleep(1)
-        self.ClickFromClass("cell", "And...")
-        self.ClickFromClass("name-button", "Created By")
-        time.sleep(1)
-        self.ClickFromClass("name-button", "Created By")
-        time.sleep(1)
-        self.driver1.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[1]/div/div[1]/div/div/div[4]/div[4]/div/div/section/div/div[2]/div/div/div/div/section/div/div/div[2]/div/div/input").send_keys(self.createdBy)
-        self.driver1.find_element(By.CLASS_NAME, "btn-primary").click()
-
-        time.sleep(1)
-        self.driver1.find_element(By.ID, "email-save-and-button").click()
-        self.driver1.find_element(By.ID, "email-save-and-button-0").click()
+        self.driver.get(self.crm_url)
+        self.SendKeys("usernameField", self.username)
+        self.SendKeys("passwordField", self.password)
+        self.ClickID("login-submit")
+        time.sleep(1)  # Extra time for page load
+        self.ClickID("communications-sub-navigation-label")
+        self.ClickID("emails-navigation-link-label")
+        self.ClickFromClass("MuiButton-colorPrimary", "New Email")
+        self.ClickID("saved-templates-tab")
+        self.ClickFromClass("email-name-data", self.targetTemplate)
+        self.ClickID("email-name-input")
+        self.ClickID("email-name-modal-confirm")
 
 
-
-    def OpenFundraising(self) -> None:
-        pass
-
-    def ExportFromFundraising(self) -> None:
-        pass
-
+        
     def SendReceipts(self) -> None:
+        '''
+        * This is the method that loops.
+        '''
         pass
+
+    def ClickID(self, ID: str) -> None:
+        time.sleep(1)
+        self.driver.find_element(By.ID, ID).click()
+
+    def SendKeys(self, ID: str, sentString: str) -> None:
+        time.sleep(1)
+        self.driver.find_element(By.ID, ID).send_keys(sentString)
 
     def ClickFromClass(self, className: str, targetText: str) -> None:
-        collection = self.driver1.find_elements(By.CLASS_NAME, className) 
+        '''
+        * This is a helper function to make it easier to target an HTML
+        * element that does not have an ID. It uses the className, then 
+        * targets the specific element based on its innerText (targetText).
+        '''
+        time.sleep(1)
+        collection = self.driver.find_elements(By.CLASS_NAME, className) 
         
         for e in collection:
             if e.text == targetText:
