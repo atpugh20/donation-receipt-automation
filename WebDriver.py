@@ -41,7 +41,6 @@ class WebDriver:
         self.ClickID("email-name-modal-confirm")
 
 
-        
     def SendReceipts(self) -> None:
         '''
         * This is the method that loops.
