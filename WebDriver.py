@@ -15,8 +15,7 @@ class WebDriver:
         self.username = os.getenv("USERNAME")
         self.email = os.getenv("EMAIL")
         self.password = os.getenv("PASSWORD")
-        self.crm_url = os.getenv("CRM_URL")
-        self.fundraising_url = os.getenv("FUNDRAISING_URL")
+        self.crmURL = os.getenv("CRM_URL")
 
         self.targetTemplate = "Donation Receipt (template)"
         self.emailName = "automated_email"
@@ -27,7 +26,11 @@ class WebDriver:
         print("Web Driver Built.")
 
     def OpenCRM(self) -> None:
-        self.driver.get(self.crm_url)
+        '''
+        * This method logs in the driver and navigates to the proper page
+        * to start the main loop. 
+        '''
+        self.driver.get(self.crmURL)
         self.SendKeys("usernameField", self.username)
         self.SendKeys("passwordField", self.password)
         self.ClickID("login-submit")
@@ -38,6 +41,7 @@ class WebDriver:
         self.ClickID("saved-templates-tab")
         self.ClickFromClass("email-name-data", self.targetTemplate)
         self.ClickID("email-name-input")
+        self.SendKeys("email-name-input", self.emailName)
         self.ClickID("email-name-modal-confirm")
 
 
@@ -47,13 +51,22 @@ class WebDriver:
         '''
         pass
 
+
+    def DeleteEmail(self) -> None:
+        pass
+
+
     def ClickID(self, ID: str) -> None:
         time.sleep(1)
+        self.WaitFor(By.ID, ID)
         self.driver.find_element(By.ID, ID).click()
+
 
     def SendKeys(self, ID: str, sentString: str) -> None:
         time.sleep(1)
+        self.WaitFor(By.ID, ID)
         self.driver.find_element(By.ID, ID).send_keys(sentString)
+
 
     def ClickFromClass(self, className: str, targetText: str) -> None:
         '''
@@ -69,3 +82,26 @@ class WebDriver:
                 print("Clicking on", targetText)
                 e.click()
                 break
+
+
+    def WaitFor(self, selectorType, selectorName: str):
+        '''
+        * Will halt web driver automation until a certain element
+        * is on the screen. This is used to allow the user to login 
+        * before the automation starts.
+        *
+        * Parameters:
+        * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
+        * - [selectorName]: string for ID or Class name
+        '''
+
+        while True:
+            try:
+                self.driver.find_element(selectorType, selectorName)
+                print(f'"{selectorName}" found!')
+                time.sleep(1)
+                return
+            except NoSuchElementException:
+                print(f'Searching for "{selectorName}"...')
+                time.sleep(1)
+                continue
