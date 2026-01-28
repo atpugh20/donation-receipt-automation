@@ -7,7 +7,7 @@ class Application:
     def __init__(self):
         print("Building app...")
 
-        self.usesFundraising = False
+        self.usesFundraising = True
 
         self.wd = WebDriver(self.usesFundraising)
         self.fh = FileHandler()
@@ -16,17 +16,13 @@ class Application:
 
     def Run(self):
         print("Running app...")
-
-        # Load File
         self.fh.LoadFile()
 
         # Open CRM and Fundraiser
         self.wd.OpenCRM(self.wd.d1)
-
         if self.usesFundraising:
             self.wd.OpenCRM(self.wd.d2)
             self.wd.NavigateToExport(self.wd.d2)
-
 
         # Main loop
         while True:
@@ -36,15 +32,14 @@ class Application:
             if not self.wd.emailPrepped:
                 self.wd.NavigateToEmailSend(self.fh.iterator, self.wd.d1)
 
-
-            # Refresh Exports
-            
+            # Refresh Exports            
             if self.usesFundraising:
                 self.wd.ExportDontations(self.wd.d2)
 
+            # Check if the emails can be sent
             self.wd.SendReceipts(self.wd.d1)
 
-            # If the email was sent iterate email number, then deactivate email
+            # If the email was sent, iterate email number, then deactivate email
             if not self.wd.emailPrepped:
                 self.fh.iterator += 1
                 self.fh.SaveFile()
@@ -57,10 +52,5 @@ class Application:
 
             time.sleep(2)
 
-            # Check donorss
-
-            # If donors
-                # Send Email
-                # Return to main menu
-
+        # Out of the main loop 
         print("App completed running.") 

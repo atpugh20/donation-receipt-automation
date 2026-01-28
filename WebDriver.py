@@ -43,7 +43,6 @@ class WebDriver:
         * to start the main loop. 
         '''
         d.get(self.crmURL)
-        print(self.username)
         print(self.password)
         self.SendKeys("usernameField", self.username, d)
         self.SendKeys("passwordField", self.password, d)
@@ -86,8 +85,6 @@ class WebDriver:
             self.ClickID("send-bee", d)
 
             sendMenuElements = d.find_elements(By.CSS_SELECTOR, ".dropdown-menu > li")
-            print(sendMenuElements)
-            print(len(sendMenuElements))
 
             # Check to see if these contacts are able to receive this email
             if (len(sendMenuElements) > 1):
@@ -95,6 +92,7 @@ class WebDriver:
                 print("Can send!")
                 sendMenuElements[0].click()
                 self.ClickFromClass("btn-success", "Yes", d)
+                # Close window and refresh page
                 d.close()
                 d.switch_to.window(d.window_handles[0])
                 self.emailPrepped = False
@@ -121,10 +119,12 @@ class WebDriver:
 
 
     def DeactivateEmail(self, d: webdriver.Firefox) -> bool:
-        emailDeactivated = False 
+        emailDeactivated = False
+
+        d.get(self.crmURL + "/Mailing/Email/Template/")
         
         # Get all rows
-        rows = d.find_elements(By.ID, "data-grid-row")
+        rows = self.GetClassListElements("data-grid-row", d)
 
         # Get row that has the right name
         print("Searching rows for email...")
@@ -134,8 +134,9 @@ class WebDriver:
             # Deactivate that email with name
             if name == self.emailNumberName:
                 print(f"Found {self.emailNumberName}!")
+                time.sleep(1)
                 row.find_element(By.CLASS_NAME, "MuiButtonBase-root").click()
-                row.find_element(By.ID, "toggle-email-menu-action").click()
+                self.ClickID("toggle-email-menu-action", d)
                 emailDeactivated = True
             else:
                 print(f"Could not find {self.emailNumberName}")
@@ -175,14 +176,19 @@ class WebDriver:
         * element that does not have an ID. It uses the className, then 
         * targets the specific element based on its innerText (targetText).
         '''
-        self.WaitFor(By.CLASS_NAME, className, d)
-        collection = d.find_elements(By.CLASS_NAME, className) 
+        collection = self.GetClassListElements(className, d)
         
         for e in collection:
             if e.text == targetText:
                 print("Clicking on", targetText)
                 e.click()
                 break
+    
+
+    def GetClassListElements(self, className: str, d: webdriver.Firefox):
+        self.WaitFor(By.CLASS_NAME, className, d)
+        collection = d.find_elements(By.CLASS_NAME, className)
+        return collection
 
 
     def CheckIfElementExists(self, selectorType, selectorName: str, d: webdriver.Firefox) -> bool:
@@ -209,7 +215,6 @@ class WebDriver:
         * - [selectorName]: string for ID or Class name
         * - [d]: the webdriver object
         '''
-
         while True:
             if (self.CheckIfElementExists(selectorType, selectorName, d)):
                 return
