@@ -10,11 +10,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 
 class WebDriver:
-    def __init__(self):
+    def __init__(self, usesFundrasing: bool):
         print("Building Web Driver...")        
         load_dotenv()
         self.os = platform.system()
-        self.username = os.getenv("USERNAME")
+        self.username = os.getenv("B_USERNAME")
         self.email = os.getenv("EMAIL")
         self.password = os.getenv("PASSWORD")
         self.crmURL = os.getenv("CRM_URL")
@@ -28,7 +28,8 @@ class WebDriver:
         self.emailPrepped = False
 
         self.d1 = webdriver.Firefox()  # CRM
-        self.d2 = webdriver.Firefox()  # Fundraising
+        if usesFundrasing:
+            self.d2 = webdriver.Firefox()  # Fundraising
 
         self.a1 = ActionChains(self.d1) # Action chain for CRM Driver
 
@@ -42,6 +43,8 @@ class WebDriver:
         * to start the main loop. 
         '''
         d.get(self.crmURL)
+        print(self.username)
+        print(self.password)
         self.SendKeys("usernameField", self.username, d)
         self.SendKeys("passwordField", self.password, d)
         self.ClickID("login-submit", d)

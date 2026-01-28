@@ -6,8 +6,12 @@ from FileHandler import FileHandler
 class Application:
     def __init__(self):
         print("Building app...")
-        self.wd = WebDriver()
+
+        self.usesFundraising = False
+
+        self.wd = WebDriver(self.usesFundraising)
         self.fh = FileHandler()
+
         print("App built.")
 
     def Run(self):
@@ -18,9 +22,10 @@ class Application:
 
         # Open CRM and Fundraiser
         self.wd.OpenCRM(self.wd.d1)
-        self.wd.OpenCRM(self.wd.d2)
 
-        self.wd.NavigateToExport(self.wd.d2)
+        if self.usesFundraising:
+            self.wd.OpenCRM(self.wd.d2)
+            self.wd.NavigateToExport(self.wd.d2)
 
 
         # Main loop
@@ -33,8 +38,10 @@ class Application:
 
 
             # Refresh Exports
+            
+            if self.usesFundraising:
+                self.wd.ExportDontations(self.wd.d2)
 
-            self.wd.ExportDontations(self.wd.d2)
             self.wd.SendReceipts(self.wd.d1)
 
             # If the email was sent iterate email number, then deactivate email
