@@ -46,7 +46,6 @@ class WebDriver:
         * - [d]: the webdriver object
         '''
         d.get(self.crmURL)
-        print(self.password)
         self.SendKeys("usernameField", self.username, d)
         self.SendKeys("passwordField", self.password, d)
         self.ClickID("login-submit", d)
