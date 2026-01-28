@@ -106,14 +106,22 @@ class WebDriver:
             self.ClickID("email-save-and-button-0", d)
             self.ClickID("send-bee", d)
 
+            self.WaitFor(By.CSS_SELECTOR, ".dropdown-menu > li", d)
             sendMenuElements = d.find_elements(By.CSS_SELECTOR, ".dropdown-menu > li")
 
             # Check to see if these contacts are able to receive this email
             if (len(sendMenuElements) > 1):
-                # Send email
                 print("Can send!")
-                sendMenuElements[0].click()
+
+                # Send email
+                for e in sendMenuElements:
+                    if e.text == "Send Now":
+                        e.click()
+                        break
+                
+                # Confirm sent email
                 self.ClickFromClass("btn-success", "Yes", d)
+
                 # Close window and refresh page
                 d.close()
                 d.switch_to.window(d.window_handles[0])
