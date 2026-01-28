@@ -41,6 +41,9 @@ class WebDriver:
         '''
         * This method logs in the driver and navigates to the proper page
         * to start the main loop. 
+        * 
+        * Parameters:
+        * - [d]: the webdriver object
         '''
         d.get(self.crmURL)
         print(self.password)
@@ -53,6 +56,9 @@ class WebDriver:
         '''
         * This method logs in the driver to the CRM then navigates to the
         * Fundraising export page.
+        *
+        * Parameters:
+        * - [d]: the webdriver object
         '''
         d.get(self.fundraisingURL)
         self.ClickFromClass("ui-primary-color", "Confirm", d)
@@ -60,6 +66,15 @@ class WebDriver:
 
 
     def NavigateToEmailSend(self, emailNum: int, d: webdriver.Firefox) -> None:
+        '''
+        * This method prepares a new email to be sent, using [emailNum] to
+        * identify which email number we are on. 
+        *
+        * Parameters:
+        * - [emailNum]: the iterator that says wh
+        * - [d]: the webdriver object
+
+        '''
         d.get(self.crmURL + "/Mailing/Email/Template/Edit/23")
         self.ClickID("email-copy-button", d)
         d.switch_to.window(d.window_handles[1])
@@ -72,7 +87,15 @@ class WebDriver:
 
     def SendReceipts(self, d: webdriver.Firefox) -> bool:
         '''
-        * This method will loop
+        * This method will loop.
+        * 
+        * From the email send page, this method:
+        * 1. Checks for any new donors
+        * 2. Checks if these new donors are able to receive the email
+        * 3. Sends the email if they are able to receive it
+        * 
+        * Paramters:
+        * - [d]: the webdriver object
         '''
         self.WaitToBeClickable(By.CLASS_NAME, "btn-refresh", d)
         time.sleep(2)
@@ -110,7 +133,11 @@ class WebDriver:
 
     def ExportDontations(self, d: webdriver.Firefox) -> None:
         '''
-        * This method will loop 
+        * This method will loop. It will continuously click the export
+        * button that is located on the fundraising page integrations page.
+        *
+        * Paramters:
+        * - [d]: the webdriver object
         '''
         print("Starting Export...")
         self.ClickFromClass("border-solid", "Export", d)
@@ -148,6 +175,10 @@ class WebDriver:
         '''
         * Waits for the element with the ID of [ID] to appear, then
         * clicks on it.
+        * 
+        * Parameters:
+        * - [ID]: string of the elements html id
+        * - [d]: the webdriver object
         '''
         self.WaitFor(By.ID, ID, d)
         d.find_element(By.ID, ID).click()
@@ -157,6 +188,11 @@ class WebDriver:
         '''
         * Clears the selected text field, then sends the value of 
         * [sentString] into the field.
+        *
+        * Parameters:
+        * - [ID]: string of the fields html id
+        * - [sentString]: the string of keys that will be input into the field
+        * - [d]: the webdriver object
         '''
         self.WaitFor(By.ID, ID, d)
         field = d.find_element(By.ID, ID)
@@ -175,6 +211,11 @@ class WebDriver:
         * This is a helper function to make it easier to target an HTML
         * element that does not have an ID. It uses the className, then 
         * targets the specific element based on its innerText (targetText).
+        * 
+        * Parameters:
+        * - [className]: string for elements class name to sort through
+        * - [targetText]: string for the html innertext that will identify the element
+        * - [d]: the webdriver object
         '''
         collection = self.GetClassListElements(className, d)
         
@@ -186,12 +227,29 @@ class WebDriver:
     
 
     def GetClassListElements(self, className: str, d: webdriver.Firefox):
+        '''
+        * This method returns a list of all elements that have the
+        * specified class name.
+        * 
+        * Parameters:
+        * - [className]: string for the elements class name that will be sorted through
+        * - [d]: the webdriver object
+        '''
         self.WaitFor(By.CLASS_NAME, className, d)
         collection = d.find_elements(By.CLASS_NAME, className)
         return collection
 
 
     def CheckIfElementExists(self, selectorType, selectorName: str, d: webdriver.Firefox) -> bool:
+        '''
+        * This method returns True if the specified html element exists on the 
+        * page, and returns False if it does not.
+        *
+        * Paramters:
+        * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
+        * - [selectorName]: string for ID or Class name
+        * - [d]: the webdriver object
+        '''
         exists = False
         try:
             d.find_element(selectorType, selectorName)
@@ -204,11 +262,10 @@ class WebDriver:
         return exists
 
 
-    def WaitFor(self, selectorType, selectorName: str, d: webdriver.Firefox):
+    def WaitFor(self, selectorType, selectorName: str, d: webdriver.Firefox) -> None:
         '''
         * Will halt web driver automation until a certain element
-        * is on the screen. This is used to allow the user to login 
-        * before the automation starts.
+        * has loaded into the DOM.
         *
         * Parameters:
         * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
@@ -223,7 +280,16 @@ class WebDriver:
                 continue
 
 
-    def WaitToBeClickable(self, selectorType, selectorName: str, d: webdriver.Firefox):
+    def WaitToBeClickable(self, selectorType, selectorName: str, d: webdriver.Firefox) -> None:
+        '''
+        * Will halt web driver automation until a certain element
+        * is able to be clicked.
+        *
+        * Parameters:
+        * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
+        * - [selectorName]: string for ID or Class name
+        * - [d]: the webdriver object
+        ''' 
         while True:
             time.sleep(1)
             try:
