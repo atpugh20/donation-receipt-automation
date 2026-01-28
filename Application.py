@@ -6,21 +6,54 @@ from FileHandler import FileHandler
 class Application:
     def __init__(self):
         print("Building app...")
-
-        self.webDriver = WebDriver()
-        self.fileHandler = FileHandler()
-
+        self.wd = WebDriver()
+        self.fh = FileHandler()
         print("App built.")
 
     def Run(self):
         print("Running app...")
-        self.fileHandler.LoadFile()
-        self.webDriver.OpenCRM()
+
+        # Load File
+        self.fh.LoadFile()
+
+        # Open CRM and Fundraiser
+        self.wd.OpenCRM(self.wd.d1)
+        self.wd.OpenCRM(self.wd.d2)
+
+        self.wd.NavigateToExport(self.wd.d2)
+
 
         # Main loop
         while True:
-            time.sleep(1)
-            self.fileHandler.iterator += 1
-            self.fileHandler.SaveFile()
+            print("Looping...")
+
+            # If the email is not prepped, then prep it
+            if not self.wd.emailPrepped:
+                self.wd.NavigateToEmailSend(self.fh.iterator, self.wd.d1)
+
+
+            # Refresh Exports
+
+            self.wd.ExportDontations(self.wd.d2)
+            self.wd.SendReceipts(self.wd.d1)
+
+            # If the email was sent iterate email number, then deactivate email
+            if not self.wd.emailPrepped:
+                self.fh.iterator += 1
+                self.fh.SaveFile()
+
+                if self.wd.DeactivateEmail(self.wd.d1):
+                    print(f"{self.wd.emailNumberName} deactivated!")
+                else:
+                    print(f"{self.wd.emailNumberName} failed to deactivate")
+                    break
+
+            time.sleep(2)
+
+            # Check donorss
+
+            # If donors
+                # Send Email
+                # Return to main menu
 
         print("App completed running.") 
