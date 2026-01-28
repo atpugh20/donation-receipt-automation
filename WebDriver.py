@@ -35,6 +35,7 @@ class WebDriver:
         print(f"Operating system identified: {self.os}")
         print("Web Driver Built.")
 
+
     def OpenCRM(self, d: webdriver.Firefox) -> None:
         '''
         * This method logs in the driver and navigates to the proper page
@@ -71,10 +72,10 @@ class WebDriver:
         '''
         * This method will loop
         '''
-
         self.WaitToBeClickable(By.CLASS_NAME, "btn-refresh", d)
         time.sleep(2)
 
+        # Check to see if there are any new donors
         if (self.CheckIfElementExists(By.CLASS_NAME, "summary-row", d)):
             print("Donors found!")
             self.ClickID("email-save-and-button", d)
@@ -85,11 +86,18 @@ class WebDriver:
             print(sendMenuElements)
             print(len(sendMenuElements))
 
+            # Check to see if these contacts are able to receive this email
             if (len(sendMenuElements) > 1):
+                # Send email
                 print("Can send!")
                 sendMenuElements[0].click()
+                self.ClickFromClass("btn-success", "Yes", d)
+                d.close()
+                d.switch_to.window(d.window_handles[0])
                 self.emailPrepped = False
+                d.refresh()
             else:
+                # Return to donor table screen
                 print("Cannot send email...")
                 self.ClickFromClass("btn ", "Make Changes", d)
                 self.ClickID("recipients-tab", d)
@@ -103,8 +111,10 @@ class WebDriver:
         '''
         * This method will loop 
         '''
+        print("Starting Export...")
         self.ClickFromClass("border-solid", "Export", d)
         self.ClickID("dialog__decline", d)
+        print("Export completed!")
 
 
     def DeactivateEmail(self, d: webdriver.Firefox) -> bool:
@@ -120,10 +130,12 @@ class WebDriver:
 
             # Deactivate that email with name
             if name == self.emailNumberName:
-                print("Found email")
+                print(f"Found {self.emailNumberName}!")
                 row.find_element(By.CLASS_NAME, "MuiButtonBase-root").click()
                 row.find_element(By.ID, "toggle-email-menu-action").click()
                 emailDeactivated = True
+            else:
+                print(f"Could not find {self.emailNumberName}")
         
         return emailDeactivated
 
@@ -146,6 +158,7 @@ class WebDriver:
         field = d.find_element(By.ID, ID)
         key = Keys.CONTROL
 
+        # If a mac computer, change CTRL to CMD
         if (self.os == "Darwin"):
             key = Keys.COMMAND
 
