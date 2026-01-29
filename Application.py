@@ -50,7 +50,7 @@ class Application:
                     print(f"{self.wd.emailNumberName} failed to deactivate")
                     break
 
-            time.sleep(2)
+            time.sleep(60)  # Wait one minute before looping again
 
         # Out of the main loop 
         print("App completed running.") 
