@@ -7,7 +7,7 @@ class Application:
     def __init__(self):
         print("Building app...")
 
-        self.usesFundraising = True
+        self.usesFundraising = False
 
         self.wd = WebDriver(self.usesFundraising)
         self.fh = FileHandler()
