@@ -19,9 +19,12 @@ class Application:
         self.fh.LoadFile()
 
         # Open CRM and Fundraiser
-        self.wd.OpenCRM(self.wd.d1)
+        self.wd.d1.get(self.wd.crmURL)
+        self.wd.CheckLogin(self.wd.d1)
+
         if self.usesFundraising:
-            self.wd.OpenCRM(self.wd.d2)
+            self.wd.d2.get(self.wd.crmURL)
+            self.wd.CheckLogin(self.wd.d2)
             self.wd.NavigateToExport(self.wd.d2)
 
         # Main loop

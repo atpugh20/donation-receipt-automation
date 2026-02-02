@@ -2,6 +2,7 @@ import os
 import time
 import platform
 from dotenv import load_dotenv
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -37,7 +38,7 @@ class WebDriver:
         print("Web Driver Built.")
 
 
-    def OpenCRM(self, d: webdriver.Firefox) -> None:
+    def LoginCRM(self, d: webdriver.Firefox) -> None:
         '''
         * This method logs in the driver and navigates to the proper page
         * to start the main loop. 
@@ -45,7 +46,6 @@ class WebDriver:
         * Parameters:
         * - [d]: the webdriver object
         '''
-        d.get(self.crmURL)
         self.SendKeys("usernameField", self.username, d)
         self.SendKeys("passwordField", self.password, d)
         self.ClickID("login-submit", d)
@@ -72,7 +72,6 @@ class WebDriver:
         * Parameters:
         * - [emailNum]: the iterator that says wh
         * - [d]: the webdriver object
-
         '''
         d.get(self.crmURL + "/Mailing/Email/Template/Edit/23")
         self.ClickID("email-copy-button", d)
@@ -100,6 +99,7 @@ class WebDriver:
         time.sleep(2)
 
         # Check to see if there are any new donors
+        self.CheckLogin(d)
         if (self.CheckIfElementExists(By.CLASS_NAME, "summary-row", d)):
             print("Donors found!")
             self.ClickID("email-save-and-button", d)
@@ -158,11 +158,13 @@ class WebDriver:
         d.get(self.crmURL + "/Mailing/Email/Template/")
         
         # Get all rows
+        self.CheckLogin(d)
         rows = self.GetClassListElements("data-grid-row", d)
 
         # Get row that has the right name
         print("Searching rows for email...")
         for row in rows:
+            self.CheckLogin(d)
             name = row.find_element(By.CLASS_NAME, "email-name-data").text
 
             # Deactivate that email with name
@@ -187,6 +189,7 @@ class WebDriver:
         * - [ID]: string of the elements html id
         * - [d]: the webdriver object
         '''
+        self.CheckLogin(d)
         self.WaitFor(By.ID, ID, d)
         d.find_element(By.ID, ID).click()
 
@@ -201,6 +204,7 @@ class WebDriver:
         * - [sentString]: the string of keys that will be input into the field
         * - [d]: the webdriver object
         '''
+        self.CheckLogin(d)
         self.WaitFor(By.ID, ID, d)
         field = d.find_element(By.ID, ID)
         key = Keys.CONTROL
@@ -224,6 +228,8 @@ class WebDriver:
         * - [targetText]: string for the html innertext that will identify the element
         * - [d]: the webdriver object
         '''
+        self.CheckLogin(d)
+
         collection = self.GetClassListElements(className, d)
         
         for e in collection:
@@ -242,6 +248,7 @@ class WebDriver:
         * - [className]: string for the elements class name that will be sorted through
         * - [d]: the webdriver object
         '''
+        self.CheckLogin(d)
         self.WaitFor(By.CLASS_NAME, className, d)
         collection = d.find_elements(By.CLASS_NAME, className)
         return collection
@@ -251,6 +258,9 @@ class WebDriver:
         '''
         * This method returns True if the specified html element exists on the 
         * page, and returns False if it does not.
+        *
+        * This method is called in CheckLogin(), so CheckLogin() must be called
+        * before this method is called, to prevent recursion loop.
         *
         * Paramters:
         * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
@@ -279,7 +289,9 @@ class WebDriver:
         * - [selectorName]: string for ID or Class name
         * - [d]: the webdriver object
         '''
+
         while True:
+            self.CheckLogin(d)
             if (self.CheckIfElementExists(selectorType, selectorName, d)):
                 return
             else:
@@ -299,6 +311,8 @@ class WebDriver:
         ''' 
         while True:
             time.sleep(1)
+            self.CheckLogin(d) 
+
             try:
                 element = d.find_element(selectorType, selectorName)
                 d.execute_script("arguments[0].scrollIntoView(true);", element)
@@ -310,6 +324,20 @@ class WebDriver:
                 print(f"{selectorName} not yet clickable...")
 
     
-    def CheckForIdle(callback: function, d: webdriver.Firefox):
-        print("Checking for idle window")
-        callback()
+    def CheckLogin(self, d: webdriver.Firefox) -> bool:
+        '''
+        * Checks the window to see if the login page has popped up. If it has,
+        * then it will log the user in. If not, it will continue as normal.
+        * This should be called before any action is performed so that the 
+        * driver will stay logged in as long as possible.
+        *
+        * Parameters:
+        * - [d]: the webdriver object
+        ''' 
+        if (self.CheckIfElementExists(By.ID, "usernameField", d)):
+            print("Logging in...") 
+            self.LoginCRM(d)
+            print("Logged in!")
+            return True 
+        return False
+        
