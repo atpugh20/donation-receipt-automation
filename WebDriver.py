@@ -308,3 +308,8 @@ class WebDriver:
                 return
             except ElementClickInterceptedException:
                 print(f"{selectorName} not yet clickable...")
+
+    
+    def CheckForIdle(callback: function, d: webdriver.Firefox):
+        print("Checking for idle window")
+        callback()
