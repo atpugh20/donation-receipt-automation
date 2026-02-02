@@ -46,9 +46,9 @@ class WebDriver:
         * Parameters:
         * - [d]: the webdriver object
         '''
-        self.SendKeys("usernameField", self.username, d)
-        self.SendKeys("passwordField", self.password, d)
-        self.ClickID("login-submit", d)
+        self.SendKeys("usernameField", self.username, True, d)
+        self.SendKeys("passwordField", self.password, True, d)
+        self.ClickID("login-submit", True, d)
 
 
     def NavigateToExport(self, d: webdriver.Firefox) -> None:
@@ -60,7 +60,7 @@ class WebDriver:
         * - [d]: the webdriver object
         '''
         d.get(self.fundraisingURL)
-        self.ClickFromClass("ui-primary-color", "Confirm", d)
+        self.ClickFromClass("ui-primary-color", "Confirm", False, d)
         d.get(self.fundraisingURL)
 
 
@@ -74,12 +74,12 @@ class WebDriver:
         * - [d]: the webdriver object
         '''
         d.get(self.crmURL + "/Mailing/Email/Template/Edit/23")
-        self.ClickID("email-copy-button", d)
+        self.ClickID("email-copy-button", False, d)
         d.switch_to.window(d.window_handles[1])
-        self.ClickID("edit-email-name-btn", d)
+        self.ClickID("edit-email-name-btn", False, d)
         self.emailNumberName = self.emailName + "_" + str(emailNum)
-        self.SendKeys("email-title-input", self.emailNumberName + Keys.ENTER, d)
-        self.ClickID("recipients-tab", d)
+        self.SendKeys("email-title-input", self.emailNumberName + Keys.ENTER, False, d)
+        self.ClickID("recipients-tab", False, d)
         self.emailPrepped = True
 
 
@@ -95,18 +95,18 @@ class WebDriver:
         * Paramters:
         * - [d]: the webdriver object
         '''
-        self.WaitToBeClickable(By.CLASS_NAME, "btn-refresh", d)
+        self.WaitToBeClickable(By.CLASS_NAME, "btn-refresh", False, d)
         time.sleep(2)
 
         # Check to see if there are any new donors
         self.CheckLogin(d)
-        if (self.CheckIfElementExists(By.CLASS_NAME, "summary-row", d)):
+        if (self.CheckIfElementExists(By.CLASS_NAME, "summary-row", False, d)):
             print("Donors found!")
-            self.ClickID("email-save-and-button", d)
-            self.ClickID("email-save-and-button-0", d)
-            self.ClickID("send-bee", d)
+            self.ClickID("email-save-and-button", False, d)
+            self.ClickID("email-save-and-button-0", False, d)
+            self.ClickID("send-bee", False, d)
 
-            self.WaitFor(By.CSS_SELECTOR, ".dropdown-menu > li", d)
+            self.WaitFor(By.CSS_SELECTOR, ".dropdown-menu > li", False, d)
             sendMenuElements = d.find_elements(By.CSS_SELECTOR, ".dropdown-menu > li")
 
             # Check to see if these contacts are able to receive this email
@@ -120,7 +120,7 @@ class WebDriver:
                         break
                 
                 # Confirm sent email
-                self.ClickFromClass("btn-success", "Yes", d)
+                self.ClickFromClass("btn-success", "Yes", False, d)
 
                 # Close window and refresh page
                 d.close()
@@ -130,8 +130,8 @@ class WebDriver:
             else:
                 # Return to donor table screen
                 print("Cannot send email...")
-                self.ClickFromClass("btn ", "Make Changes", d)
-                self.ClickID("recipients-tab", d)
+                self.ClickFromClass("btn ", "Make Changes", False, d)
+                self.ClickID("recipients-tab", False, d)
 
         else:
             print("No donors yet...")
@@ -147,8 +147,8 @@ class WebDriver:
         * - [d]: the webdriver object
         '''
         print("Starting Export...")
-        self.ClickFromClass("border-solid", "Export", d)
-        self.ClickID("dialog__decline", d)
+        self.ClickFromClass("border-solid", "Export", False, d)
+        self.ClickID("dialog__decline", False, d)
         print("Export completed!")
 
 
@@ -159,7 +159,7 @@ class WebDriver:
         
         # Get all rows
         self.CheckLogin(d)
-        rows = self.GetClassListElements("data-grid-row", d)
+        rows = self.GetClassListElements("data-grid-row", False, d)
 
         # Get row that has the right name
         print("Searching rows for email...")
@@ -172,7 +172,7 @@ class WebDriver:
                 print(f"Found {self.emailNumberName}!")
                 time.sleep(1)
                 row.find_element(By.CLASS_NAME, "MuiButtonBase-root").click()
-                self.ClickID("toggle-email-menu-action", d)
+                self.ClickID("toggle-email-menu-action", False, d)
                 emailDeactivated = True
             else:
                 print(f"Could not find {self.emailNumberName}")
@@ -180,21 +180,23 @@ class WebDriver:
         return emailDeactivated
 
 
-    def ClickID(self, ID: str, d: webdriver.Firefox) -> None:
+    def ClickID(self, ID: str, loggingIn: bool, d: webdriver.Firefox) -> None:
         '''
         * Waits for the element with the ID of [ID] to appear, then
         * clicks on it.
         * 
         * Parameters:
         * - [ID]: string of the elements html id
+        * - [loggingIn]: boolean to determine if the driver is on the login page
         * - [d]: the webdriver object
         '''
-        self.CheckLogin(d)
-        self.WaitFor(By.ID, ID, d)
+        if not loggingIn: 
+            self.CheckLogin(d)
+        self.WaitFor(By.ID, ID, loggingIn, d)
         d.find_element(By.ID, ID).click()
 
 
-    def SendKeys(self, ID: str, sentString: str, d: webdriver.Firefox) -> None:
+    def SendKeys(self, ID: str, sentString: str, loggingIn: bool, d: webdriver.Firefox) -> None:
         '''
         * Clears the selected text field, then sends the value of 
         * [sentString] into the field.
@@ -202,10 +204,10 @@ class WebDriver:
         * Parameters:
         * - [ID]: string of the fields html id
         * - [sentString]: the string of keys that will be input into the field
+        * - [loggingIn]: boolean to determine if the driver is on the login page
         * - [d]: the webdriver object
         '''
-        self.CheckLogin(d)
-        self.WaitFor(By.ID, ID, d)
+        self.WaitFor(By.ID, ID, loggingIn, d)
         field = d.find_element(By.ID, ID)
         key = Keys.CONTROL
 
@@ -217,7 +219,7 @@ class WebDriver:
         field.send_keys(sentString)
 
 
-    def ClickFromClass(self, className: str, targetText: str, d: webdriver.Firefox) -> None:
+    def ClickFromClass(self, className: str, targetText: str, loggingIn: bool, d: webdriver.Firefox) -> None:
         '''
         * This is a helper function to make it easier to target an HTML
         * element that does not have an ID. It uses the className, then 
@@ -226,9 +228,11 @@ class WebDriver:
         * Parameters:
         * - [className]: string for elements class name to sort through
         * - [targetText]: string for the html innertext that will identify the element
+        * - [loggingIn]: boolean to determine if the driver is on the login page
         * - [d]: the webdriver object
         '''
-        self.CheckLogin(d)
+        if not loggingIn:
+            self.CheckLogin(d)
 
         collection = self.GetClassListElements(className, d)
         
@@ -239,22 +243,25 @@ class WebDriver:
                 break
     
 
-    def GetClassListElements(self, className: str, d: webdriver.Firefox):
+    def GetClassListElements(self, className: str, loggingIn: bool, d: webdriver.Firefox):
         '''
         * This method returns a list of all elements that have the
         * specified class name.
         * 
         * Parameters:
         * - [className]: string for the elements class name that will be sorted through
+        * - [loggingIn]: boolean to determine if the driver is on the login page
         * - [d]: the webdriver object
         '''
-        self.CheckLogin(d)
-        self.WaitFor(By.CLASS_NAME, className, d)
+        if not loggingIn:
+            self.CheckLogin(d)
+
+        self.WaitFor(By.CLASS_NAME, className, loggingIn, d)
         collection = d.find_elements(By.CLASS_NAME, className)
         return collection
 
 
-    def CheckIfElementExists(self, selectorType, selectorName: str, d: webdriver.Firefox) -> bool:
+    def CheckIfElementExists(self, selectorType, selectorName: str, loggingIn: bool, d: webdriver.Firefox) -> bool:
         '''
         * This method returns True if the specified html element exists on the 
         * page, and returns False if it does not.
@@ -265,9 +272,14 @@ class WebDriver:
         * Paramters:
         * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
         * - [selectorName]: string for ID or Class name
+        * - [loggingIn]: boolean to determine if the driver is on the login page
         * - [d]: the webdriver object
         '''
         exists = False
+
+        if not loggingIn:
+            self.CheckLogin(d) 
+
         try:
             d.find_element(selectorType, selectorName)
             print(f'"{selectorName}" found!')
@@ -279,7 +291,7 @@ class WebDriver:
         return exists
 
 
-    def WaitFor(self, selectorType, selectorName: str, d: webdriver.Firefox) -> None:
+    def WaitFor(self, selectorType, selectorName: str, loggingIn: bool, d: webdriver.Firefox) -> None:
         '''
         * Will halt web driver automation until a certain element
         * has loaded into the DOM.
@@ -287,19 +299,21 @@ class WebDriver:
         * Parameters:
         * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
         * - [selectorName]: string for ID or Class name
+        * - [loggingIn]: boolean to determine if the driver is on the login page
         * - [d]: the webdriver object
         '''
-
         while True:
-            self.CheckLogin(d)
-            if (self.CheckIfElementExists(selectorType, selectorName, d)):
+            if not loggingIn:
+                self.CheckLogin(d)
+
+            if (self.CheckIfElementExists(selectorType, selectorName, loggingIn, d)):
                 return
             else:
                 print(f"Searching for {selectorName}")
                 continue
 
 
-    def WaitToBeClickable(self, selectorType, selectorName: str, d: webdriver.Firefox) -> None:
+    def WaitToBeClickable(self, selectorType, selectorName: str, loggingIn: bool,  d: webdriver.Firefox) -> None:
         '''
         * Will halt web driver automation until a certain element
         * is able to be clicked.
@@ -307,11 +321,13 @@ class WebDriver:
         * Parameters:
         * - [selectorType]: uses the selenium "By" type. Ex) ID would be: [By.ID]
         * - [selectorName]: string for ID or Class name
+        * - [loggingIn]: boolean to determine if the driver is on the login page
         * - [d]: the webdriver object
         ''' 
         while True:
             time.sleep(1)
-            self.CheckLogin(d) 
+            if not loggingIn:
+                self.CheckLogin(d) 
 
             try:
                 element = d.find_element(selectorType, selectorName)
@@ -334,7 +350,7 @@ class WebDriver:
         * Parameters:
         * - [d]: the webdriver object
         ''' 
-        if (self.CheckIfElementExists(By.ID, "usernameField", d)):
+        if (self.CheckIfElementExists(By.ID, "usernameField", True, d)):
             print("Logging in...") 
             self.LoginCRM(d)
             print("Logged in!")
