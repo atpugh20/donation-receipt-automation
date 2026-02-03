@@ -234,7 +234,7 @@ class WebDriver:
         if not loggingIn:
             self.CheckLogin(d)
 
-        collection = self.GetClassListElements(className, d)
+        collection = self.GetClassListElements(className, loggingIn, d)
         
         for e in collection:
             if e.text == targetText:
