@@ -22,7 +22,8 @@ class WebDriver:
         self.fundraisingURL = os.getenv("FUNDRAISING_URL")
 
         self.targetTemplate = "Donation Receipt (template)"
-        self.emailName = "automated_email"
+        self.emailName = "automatic_email_v2"
+        self.templateID = "123"
         self.emailNumberName = ""
         self.createdBy = "BloomerangFundraisingIntegration-Dillon Phillips"
 
@@ -73,7 +74,7 @@ class WebDriver:
         * - [emailNum]: the iterator that says wh
         * - [d]: the webdriver object
         '''
-        d.get(self.crmURL + "/Mailing/Email/Template/Edit/23")
+        d.get(self.crmURL + "/Mailing/Email/Template/Edit/" + self.templateID)
         self.ClickID("email-copy-button", False, d)
         d.switch_to.window(d.window_handles[1])
         self.ClickID("edit-email-name-btn", False, d)
